@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:whatsapp_share2/whatsapp_share2.dart';
+import 'package:whatsapp_share_plus/whatsapp_share_plus.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,7 +12,9 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   File? _image;
 
-  String _phone = '917974704221';
+  final String _phone = '917974704221';
+
+  MyApp({super.key});
 
   Future<void> share() async {
     await WhatsappShare.share(
@@ -26,16 +28,18 @@ class MyApp extends StatelessWidget {
     await getImage();
     Directory? directory = await getExternalStorageDirectory();
 
-    print('${directory!.path} / ${_image!.path}');
-    await WhatsappShare.shareFile(
-      phone: _phone,
-      filePath: ["${_image!.path}"],
-    );
+    debugPrint('${directory?.path} / ${_image?.path}');
+    if (_image != null) {
+      await WhatsappShare.shareFile(
+        phone: _phone,
+        filePath: [(_image!.path)],
+      );
+    }
   }
 
   Future<void> isInstalled() async {
     final val = await WhatsappShare.isInstalled();
-    print('Whatsapp is installed: $val');
+    debugPrint('Whatsapp is installed: $val');
   }
 
   @override
@@ -51,16 +55,16 @@ class MyApp extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               ElevatedButton(
-                child: Text('Share text and link'),
                 onPressed: share,
+                child: const Text('Share text and link'),
               ),
               ElevatedButton(
-                child: Text('Share Image'),
                 onPressed: shareFile,
+                child: const Text('Share Image'),
               ),
               ElevatedButton(
-                child: Text('is Installed'),
                 onPressed: isInstalled,
+                child: const Text('is Installed'),
               ),
             ],
           ),
@@ -72,20 +76,19 @@ class MyApp extends StatelessWidget {
   ///Pick Image From gallery using image_picker plugin
   Future getImage() async {
     try {
-      final ImagePicker _picker = ImagePicker();
-      XFile? _pickedFile =
-          (await _picker.pickImage(source: ImageSource.gallery));
+      final ImagePicker picker = ImagePicker();
+      XFile? pickedFile = (await picker.pickImage(source: ImageSource.gallery));
 
-      if (_pickedFile != null) {
+      if (pickedFile != null) {
         // getting a directory path for saving
         final directory = await getExternalStorageDirectory();
 
         // copy the file to a new path
-        await _pickedFile.saveTo('${directory!.path}/image1.png');
-        _image = File('${directory.path}/image1.png');
+        await pickedFile.saveTo('${directory?.path}/image1.png');
+        _image = File('${directory?.path}/image1.png');
       }
     } catch (er) {
-      print(er);
+      debugPrint(er.toString());
     }
   }
 }
