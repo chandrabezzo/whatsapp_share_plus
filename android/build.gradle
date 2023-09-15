@@ -2,6 +2,8 @@ group 'com.solusibejo.whatsapp_share_plus'
 version '1.0-SNAPSHOT'
 
 buildscript {
+    ext.kotlin_version = '1.7.10'
+
     repositories {
         google()
         jcenter()
@@ -9,6 +11,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -20,8 +23,13 @@ rootProject.allprojects {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
+    if (project.android.hasProperty("namespace")) {
+        namespace 'com.solusibejo.whatsapp_share_plus'
+    }
+
     compileSdkVersion 33
 
     defaultConfig {
@@ -30,6 +38,20 @@ android {
     }
     lintOptions {
         disable 'InvalidPackage'
+    }
+    
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
     }
 }
 
