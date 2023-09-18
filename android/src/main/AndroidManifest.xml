@@ -1,1 +1,8 @@
-<manifest package="com.solusibejo.whatsapp_share_plus"></manifest>
+<manifest package="com.solusibejo.whatsapp_share_plus"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+  <queries>
+    <!-- Explicit apps you know in advance about: -->
+    <package android:name="com.whatsapp"/>
+    <package android:name="com.whatsapp.w4b"/>
+  </queries>
+</manifest>

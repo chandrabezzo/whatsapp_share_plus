@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Parcelable
 import android.text.TextUtils
 import android.util.Log
 import androidx.core.content.FileProvider
@@ -15,6 +16,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import java.io.File
+
 
 /** WhatsappShare  */
 class WhatsappShare : FlutterPlugin, MethodCallHandler {
@@ -37,14 +39,19 @@ class WhatsappShare : FlutterPlugin, MethodCallHandler {
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        if (call.method == "shareFile") {
-            shareFile(call, result)
-        } else if (call.method == "share") {
-            share(call, result)
-        } else if (call.method == "isInstalled") {
-            isInstalled(call, result)
-        } else {
-            result.notImplemented()
+        when (call.method) {
+            "shareFile" -> {
+                shareFile(call, result)
+            }
+            "share" -> {
+                share(call, result)
+            }
+            "isInstalled" -> {
+                isInstalled(call, result)
+            }
+            else -> {
+                result.notImplemented()
+            }
         }
     }
 
@@ -84,7 +91,6 @@ class WhatsappShare : FlutterPlugin, MethodCallHandler {
             val title = call.argument<String>("title")
             val text = call.argument<String>("text")
             val linkUrl = call.argument<String>("linkUrl")
-            val chooserTitle = call.argument<String>("chooserTitle")
             val phone = call.argument<String>("phone")
             val packageName = call.argument<String>("package")
             if (title.isNullOrEmpty()) {
@@ -121,7 +127,6 @@ class WhatsappShare : FlutterPlugin, MethodCallHandler {
             intent.putExtra(Intent.EXTRA_SUBJECT, title)
             intent.putExtra(Intent.EXTRA_TEXT, extraText)
 
-            //Intent chooserIntent = Intent.createChooser(intent, chooserTitle);
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             context?.startActivity(intent)
@@ -135,13 +140,12 @@ class WhatsappShare : FlutterPlugin, MethodCallHandler {
     private fun shareFile(call: MethodCall, result: MethodChannel.Result) {
         val files = ArrayList<Uri>()
         try {
-            val title = call.argument<String>("title")
-            val text = call.argument<String>("text")
-            val filePaths = call.argument<ArrayList<String?>?>("filePath")
-            val phone = call.argument<String>("phone")
-            val packageName = call.argument<String>("package")
-
-            if (filePaths.isNullOrEmpty()) {
+            val title: String? = call.argument("title")
+            val text: String? = call.argument("text")
+            val filePath: String? = call.argument("filePath");
+            val phone: String? = call.argument("phone")
+            val packageName: String? = call.argument("package")
+            if (filePath.isNullOrEmpty()) {
                 Log.println(
                     Log.ERROR,
                     "",
@@ -159,27 +163,28 @@ class WhatsappShare : FlutterPlugin, MethodCallHandler {
                 return
             }
 
-            for (i in filePaths.indices) {
-                files.add(Uri.parse(filePaths[i]))
-            }
+            val file = File(filePath)
+            val fileUri = FileProvider.getUriForFile(
+                context!!,
+                context!!.applicationContext.packageName + ".provider",
+                file
+            )
 
             val intent = Intent()
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            intent.action = Intent.ACTION_SEND_MULTIPLE
+            intent.action = Intent.ACTION_SEND
             intent.type = "*/*"
             intent.setPackage(packageName)
             intent.putExtra("jid", "$phone@s.whatsapp.net")
+            intent.putExtra(Intent.EXTRA_STREAM, fileUri)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             intent.putExtra(Intent.EXTRA_SUBJECT, title)
             intent.putExtra(Intent.EXTRA_TEXT, text)
-            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files)
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context?.startActivity(intent)
+            context!!.startActivity(intent)
             result.success(true)
-        } catch (ex: Exception) {
+        } catch (ex: java.lang.Exception) {
             result.error(ex.message ?: "", null, null)
             Log.println(Log.ERROR, "", "FlutterShare: Error")
         }

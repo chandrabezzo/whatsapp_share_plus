@@ -10,9 +10,10 @@ void main() => runApp(MyApp());
 
 // ignore: must_be_immutable
 class MyApp extends StatelessWidget {
+  final scaffoldKey = GlobalKey<ScaffoldState>();
   File? _image;
 
-  final String _phone = '917974704221';
+  final String _phone = '6281546415204';
 
   MyApp({super.key});
 
@@ -32,20 +33,22 @@ class MyApp extends StatelessWidget {
     if (_image != null) {
       await WhatsappShare.shareFile(
         phone: _phone,
-        filePath: [(_image!.path)],
+        text: 'Testing',
+        filePath: _image!.path,
       );
     }
   }
 
-  Future<void> isInstalled() async {
+  void isInstalled(BuildContext context) async {
     final val = await WhatsappShare.isInstalled();
-    debugPrint('Whatsapp is installed: $val');
+    debugPrint('Is installed; $val');
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        key: scaffoldKey,
         appBar: AppBar(
           title: const Text('Whatsapp Share'),
         ),
@@ -63,7 +66,7 @@ class MyApp extends StatelessWidget {
                 child: const Text('Share Image'),
               ),
               ElevatedButton(
-                onPressed: isInstalled,
+                onPressed: () => isInstalled(context),
                 child: const Text('is Installed'),
               ),
             ],
