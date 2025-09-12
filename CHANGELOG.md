@@ -1,5 +1,8 @@
 # CHANGELOG
 
+# 2.1.0
+* Remove registrar dependency
+
 ## 2.0.3
 
 * Fix podspec issue
