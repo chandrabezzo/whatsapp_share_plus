@@ -1,4 +1,6 @@
 # CHANGELOG
+# 2.1.1
+* Update sdk version
 
 # 2.1.0
 * Remove registrar dependency
